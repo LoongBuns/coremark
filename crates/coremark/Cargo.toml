@@ -1,0 +1,10 @@
+[package]
+name = "coremark"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wamr-rust-sdk = { git = "https://github.com/bytecodealliance/wamr-rust-sdk" }
+wasmi = "0.40"
+wasmtime = "28.0"
+wasm3 = { version = "0.3", features=["build-bindgen"] }

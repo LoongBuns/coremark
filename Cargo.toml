@@ -1,0 +1,6 @@
+[workspace]
+members  = [
+    "./crates/coremark",
+    "./crates/coremark_wasm",
+]
+resolver = "2"
