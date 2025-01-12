@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use core::ops::{Add, Mul};
 
 pub struct Matrix<T> {
@@ -101,6 +102,21 @@ mod tests {
                 assert_eq!(result.get(i, j), (i + j) as i32 * 2);
             }
         }
+    }
+
+    #[test]
+    fn test_matrix_mul_vect() {
+        let size = 2;
+        let mut matrix = Matrix::new(size);
+        matrix.set(0, 0, 1);
+        matrix.set(0, 1, 2);
+        matrix.set(1, 0, 3);
+        matrix.set(1, 1, 4);
+
+        let vector = vec![2, 1];
+        let result = matrix.mul_vect(&vector);
+
+        assert_eq!(result, vec![4, 10]);
     }
 
     #[test]

@@ -16,7 +16,13 @@ fn main() {
             "wamr" => wamr_coremark(coremark_wasm),
             _ => unreachable!(),
         };
-        results.push((engine, result.unwrap()));
+
+        match result {
+            Ok(value) => results.push((engine, value)),
+            Err(e) => {
+                eprintln!("Error occurred: {}", e);
+            }
+        }
     }
 
     println!("\nResults:\n");

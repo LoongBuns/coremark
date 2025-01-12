@@ -1,3 +1,5 @@
+use alloc::boxed::Box;
+
 pub struct Node<T> {
     pub data: T,
     pub next: Option<*mut Node<T>>,

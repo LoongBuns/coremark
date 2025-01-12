@@ -8,5 +8,4 @@ crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 opt-level = "z"
-debug = 2
 lto = true

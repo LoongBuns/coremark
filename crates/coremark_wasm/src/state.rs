@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum State {
     Start,
@@ -68,16 +70,6 @@ impl State {
         }
 
         (state, state_path)
-    }
-
-    pub fn transition_multiple(input: &str, delimiter: char) -> Vec<(String, State, Vec<State>)> {
-        input
-            .split(delimiter)
-            .map(|token| {
-                let (state, path) = State::transition(token.as_bytes());
-                (token.to_string(), state, path)
-            })
-            .collect()
     }
 
     fn is_valid_final_state(state: State) -> bool {
@@ -153,38 +145,5 @@ mod tests {
             path,
             vec![State::Start, State::Invalid]
         );
-    }
-
-    #[test]
-    fn test_transition_multiple() {
-        let input = "1.23,456,-7.89e2,invalid";
-        let results = State::transition_multiple(input, ',');
-
-        assert_eq!(results.len(), 4);
-        assert_eq!(results[0], ("1.23".to_string(), State::Float, vec![
-            State::Start,
-            State::Int,
-            State::Float,
-            State::Float,
-            State::Float
-        ]));
-        assert_eq!(results[1], ("456".to_string(), State::Int, vec![
-            State::Start,
-            State::Int,
-            State::Int,
-            State::Int
-        ]));
-        assert_eq!(results[2], ("-7.89e2".to_string(), State::Scientific, vec![
-            State::Start,
-            State::S1,
-            State::Int,
-            State::Float,
-            State::Float,
-            State::Float,
-            State::S2,
-            State::Exponent,
-            State::Scientific
-        ]));
-        assert_eq!(results[3].1, State::Invalid);
     }
 }

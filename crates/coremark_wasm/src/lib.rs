@@ -1,3 +1,38 @@
+#![cfg_attr(not(test), no_std)]
+
+#[macro_use]
+extern crate alloc;
+
+#[panic_handler]
+fn panic_handler(_: &core::panic::PanicInfo) -> ! {
+    loop {}
+}
+
+mod allocator;
+
+use core::alloc::{GlobalAlloc, Layout};
+
+#[cfg(target_arch = "wasm32")]
+use allocator::FreeListAllocator;
+
+pub struct SyncAllocator<T>(T);
+
+unsafe impl<T> Sync for SyncAllocator<T> {}
+
+unsafe impl<T: GlobalAlloc> GlobalAlloc for SyncAllocator<T> {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        self.0.alloc(layout)
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        self.0.dealloc(ptr, layout);
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+#[global_allocator]
+static ALLOCATOR: SyncAllocator<FreeListAllocator> = SyncAllocator(FreeListAllocator::new());
+
 mod list;
 mod matrix;
 mod state;
@@ -11,117 +46,70 @@ extern "C" {
     fn clock_ms() -> u32;
 }
 
-struct BenchmarkResult {
-    name: &'static str,
-    time_ms: f32,
-    crc: u16,
-}
-
 #[export_name = "run"]
 pub fn run() -> f32 {
-    let mut total_time = 0.0;
+    let mut total_time = 0;
 
-    let list_result = run_benchmark("List Benchmark", benchmark_list);
-    total_time += list_result.time_ms;
-
-    let matrix_result = run_benchmark("Matrix Benchmark", benchmark_matrix);
-    total_time += matrix_result.time_ms;
-
-    let state_result = run_benchmark("State Machine Benchmark", benchmark_state);
-    total_time += state_result.time_ms;
-
-    println!("\nBenchmark Results:");
-    println!("----------------------------");
-    println!("{}: {:.2} ms, CRC: 0x{:04x}", list_result.name, list_result.time_ms, list_result.crc);
-    println!("{}: {:.2} ms, CRC: 0x{:04x}", matrix_result.name, matrix_result.time_ms, matrix_result.crc);
-    println!("{}: {:.2} ms, CRC: 0x{:04x}", state_result.name, state_result.time_ms, state_result.crc);
-    println!("----------------------------");
-    println!("Total Execution Time: {:.2} ms", total_time);
-
-    total_time
-}
-
-fn run_benchmark<F>(name: &'static str, f: F) -> BenchmarkResult
-where
-    F: FnOnce() -> u16,
-{
     unsafe {
-        let start = clock_ms();
-        let crc = f();
-        let end = clock_ms();
-        let time_ms = end.wrapping_sub(start) as f32;
-        BenchmarkResult { name, time_ms, crc }
+        total_time += benchmark_list();
+        total_time += benchmark_matrix();
+        total_time += benchmark_state();
     }
+
+    total_time as f32 / 1000.0
 }
 
-fn benchmark_list() -> u16 {
-    let mut crc = 0;
+unsafe fn benchmark_list() -> u32 {
+    let start_time = clock_ms();
 
-    let mut list = LinkedList::new();
+    let mut list = LinkedList::<i16>::new();
+    let size = 10;
 
-    for i in 0..10_000 {
+    for i in 0..size {
         list.push_front(i);
-        crc = crc16(i, crc);
     }
 
-    for _ in 0..10_000 {
-        if let Some(val) = list.pop_front() {
-            crc = crc16(val, crc);
-        }
+    list.reverse();
+    list.find(|&x| x == size / 2);
+
+    for _ in 0..size {
+        list.pop_front();
     }
 
-    crc
+    let end_time = clock_ms();
+    end_time - start_time
 }
 
-fn benchmark_matrix() -> u16 {
-    let size = 100;
-    let mut crc = 0;
+unsafe fn benchmark_matrix() -> u32 {
+    let start_time = clock_ms();
 
-    let mut a = Matrix::new(size);
-    let mut b = Matrix::new(size);
+    let size = 3;
+    let mut matrix_a = Matrix::<i16>::new(size);
+    let mut matrix_b = Matrix::<i16>::new(size);
 
     for i in 0..size {
         for j in 0..size {
-            a.set(i, j, i as i32 + j as i32);
-            b.set(i, j, i as i32 * j as i32);
+            matrix_a.set(i, j, (i + j) as i16);
+            matrix_b.set(i, j, (i - j) as i16);
         }
     }
 
-    let result = a.mul_matrix(&b);
+    matrix_a.mul_const(2);
+    matrix_b.add_const(-2);
+    matrix_a.mul_vect(&vec![1, 2, 3]);
+    matrix_a.mul_matrix(&matrix_b);
 
-    for i in 0..size {
-        for j in 0..size {
-            crc = crc16(result.get(i, j), crc);
-        }
-    }
-
-    crc
+    let end_time = clock_ms();
+    end_time - start_time
 }
 
-fn benchmark_state() -> u16 {
-    let mut crc = 0;
-    let input = "1.23e+10,123,456.789,-123.45e-6,invalid";
-    let results = State::transition_multiple(input, ',');
+unsafe fn benchmark_state() -> u32 {
+    let start_time = clock_ms();
 
-    for (token, state, _) in results {
-        crc = crc16(state as i32, crc);
+    for token in ["123.45e-6", "678", "invalid", "42e2", ".5"] {
+        State::transition(token.as_bytes());
     }
 
-    crc
-}
-
-fn crc16(data: i32, crc: u16) -> u16 {
-    let mut crc = crc;
-    let mut data = data as u16;
-
-    for _ in 0..16 {
-        if ((crc ^ data) & 0x1) != 0 {
-            crc = (crc >> 1) ^ 0xA001;
-        } else {
-            crc >>= 1;
-        }
-        data >>= 1;
-    }
-
-    crc
+    let end_time = clock_ms();
+    end_time - start_time
 }
