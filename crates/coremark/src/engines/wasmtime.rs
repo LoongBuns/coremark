@@ -10,7 +10,7 @@ pub fn wasmtime_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
 
     let module = Module::new(&engine, &b[..])?;
 
-    let mut store = Store::<u32>::new(&engine, 8);
+    let mut store = Store::<u32>::new(&engine, 64);
 
     let mut linker = Linker::new(&engine);
     linker.func_wrap("env", "clock_ms", || clock_ms())?;

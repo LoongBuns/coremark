@@ -43,7 +43,7 @@ use state::State;
 
 #[link(wasm_import_module = "env")]
 extern "C" {
-    fn clock_ms() -> u32;
+    fn clock_ms() -> i32;
 }
 
 #[export_name = "run"]
@@ -59,7 +59,7 @@ pub fn run() -> f32 {
     total_time as f32 / 1000.0
 }
 
-unsafe fn benchmark_list() -> u32 {
+unsafe fn benchmark_list() -> i32 {
     let start_time = clock_ms();
 
     let mut list = LinkedList::<i16>::new();
@@ -80,7 +80,7 @@ unsafe fn benchmark_list() -> u32 {
     end_time - start_time
 }
 
-unsafe fn benchmark_matrix() -> u32 {
+unsafe fn benchmark_matrix() -> i32 {
     let start_time = clock_ms();
 
     let size = 3;
@@ -103,7 +103,7 @@ unsafe fn benchmark_matrix() -> u32 {
     end_time - start_time
 }
 
-unsafe fn benchmark_state() -> u32 {
+unsafe fn benchmark_state() -> i32 {
     let start_time = clock_ms();
 
     for token in ["123.45e-6", "678", "invalid", "42e2", ".5"] {

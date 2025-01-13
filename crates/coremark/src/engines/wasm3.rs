@@ -10,11 +10,11 @@ pub fn wasm3_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let rt = env.create_runtime(2 * 1024)?;
     let mut module = rt.load_module(Module::parse(&env, &b[..])?)?;
 
-    module.link_function::<(), u32>("env", "clock_ms", clock_ms_wrap)?;
+    module.link_function::<(), i32>("env", "clock_ms", clock_ms_wrap)?;
 
     Ok(module
         .find_function::<(), f32>("run")?
         .call()?)
 }
 
-wasm3::make_func_wrapper!(clock_ms_wrap: clock_ms() -> u32);
+wasm3::make_func_wrapper!(clock_ms_wrap: clock_ms() -> i32);

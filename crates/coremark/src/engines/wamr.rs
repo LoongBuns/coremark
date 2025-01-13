@@ -8,13 +8,14 @@ use wamr_rust_sdk::{
 
 use super::clock_ms;
 
-extern "C" fn clock_ms_host() -> u32 {
-    clock_ms() as u32
+extern "C" fn clock_ms_host() -> i32 {
+    clock_ms() as i32
 }
 
 pub fn wamr_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let runtime = Runtime::builder()
         .use_system_allocator()
+        .run_as_interpreter()
         .register_host_function("clock_ms", clock_ms_host as *mut c_void)
         .build()?;
 
