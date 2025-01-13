@@ -5,12 +5,12 @@ mod wasmer;
 mod wasmi;
 mod wasmtime;
 
-pub fn clock_ms() -> i32 {
+pub fn clock_ms() -> i64 {
     use std::time::{SystemTime, UNIX_EPOCH};
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Clock may have gone backwards")
-        .as_millis() as i32
+        .as_millis() as i64
 }
 
 pub use wamr::wamr_coremark;

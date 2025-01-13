@@ -13,7 +13,7 @@ pub fn wasmi_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let mut store = Store::new(&engine, 64);
     let func = Func::wrap(&mut store, || clock_ms());
 
-    let mut linker = <Linker<i32>>::new(&engine);
+    let mut linker = <Linker<i64>>::new(&engine);
     linker.define("env", "clock_ms", func)?;
     let instance = linker
         .instantiate(&mut store, &module)?

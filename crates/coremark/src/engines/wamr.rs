@@ -8,8 +8,8 @@ use wamr_rust_sdk::{
 
 use super::clock_ms;
 
-extern "C" fn clock_ms_host() -> i32 {
-    clock_ms() as i32
+extern "C" fn clock_ms_host() -> i64 {
+    clock_ms()
 }
 
 pub fn wamr_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {

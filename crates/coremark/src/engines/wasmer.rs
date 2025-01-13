@@ -11,9 +11,9 @@ pub fn wasmer_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let mut store = Store::default();
     let module = Module::new(&store, &b[..])?;
 
-    let clock_ms_host_signature = FunctionType::new(vec![], vec![Type::I32]);
+    let clock_ms_host_signature = FunctionType::new(vec![], vec![Type::I64]);
     let clock_ms_host = Function::new(&mut store, &clock_ms_host_signature, |_| {
-        Ok(vec![Value::I32(clock_ms() as i32)])
+        Ok(vec![Value::I64(clock_ms())])
     });
 
     let import_object = imports! {

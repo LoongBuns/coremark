@@ -15,12 +15,12 @@ fn clock_ms_host(
     _frame: &mut CallingFrame,
     _input: Vec<WasmValue>,
 ) -> Result<Vec<WasmValue>, CoreError> {
-    Ok(vec![WasmValue::from_i32(clock_ms() as i32)])
+    Ok(vec![WasmValue::from_i64(clock_ms())])
 }
 
 pub fn wasmedge_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let mut import_builder = ImportObjectBuilder::new("env", ())?;
-    import_builder.with_func::<(), i32>("clock_ms", clock_ms_host)?;
+    import_builder.with_func::<(), i64>("clock_ms", clock_ms_host)?;
     let mut import_object = import_builder.build();
 
     let mut instances = HashMap::new();
