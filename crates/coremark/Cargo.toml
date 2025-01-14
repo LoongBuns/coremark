@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wamr-rust-sdk = { git = "https://github.com/bytecodealliance/wamr-rust-sdk" }
+wamr-rust-sdk = { git = "https://github.com/LoongBuns/wamr-rust-sdk" }
 wasm3 = { version = "0.3", features=["build-bindgen"] }
 wasmedge-sdk = "0.14"
 wasmer = "5.0"

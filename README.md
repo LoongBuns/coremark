@@ -16,7 +16,7 @@ cargo run -p coremark
 
 **Interpreter result:**
 
-* Test wasm: [coremark-minimal.wasm](https://github.com/wasm3/wasm-coremark/blob/main/coremark-minimal.wasm)
+* Test wasm: [coremark-minimal.wasm](https://github.com/wasm3/wasm-coremark/blob/main/coremark-minimal.wasm) (u64 clock_ms  version)
 * Test environment: github codespace (2core, 8RAM)
 
 | Engine   | Result   |

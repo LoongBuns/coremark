@@ -1,7 +1,7 @@
 use coremark::engines::{wasmtime_coremark, wasmedge_coremark, wasmer_coremark, wasm3_coremark, wasmi_coremark, wamr_coremark};
 
 fn main() {
-    //let coremark_wasm = include_bytes!("../../../target/wasm32-unknown-unknown/release/coremark_wasm.wasm");
+    // let coremark_wasm = include_bytes!("../../../target/wasm32-unknown-unknown/release/coremark_wasm.wasm");
     let coremark_wasm = include_bytes!("../coremark-minimal.wasm");
 
     println!("Running Coremark tests... [should take 12..20 seconds per engine]");

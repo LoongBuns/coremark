@@ -13,13 +13,13 @@ extern "C" fn clock_ms_host() -> i64 {
 }
 
 pub fn wamr_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
-    let runtime = Runtime::builder()
+    let runtime = Runtime::builder_with_module_name("env")
         .use_system_allocator()
         .run_as_interpreter()
         .register_host_function("clock_ms", clock_ms_host as *mut c_void)
         .build()?;
 
-    let module = Module::from_vec(&runtime, Vec::from(&b[..]), "env")?;
+    let module = Module::from_vec(&runtime, Vec::from(&b[..]), "")?;
 
     let instance = Instance::new(&runtime, &module, 2 * 1024)?;
 
