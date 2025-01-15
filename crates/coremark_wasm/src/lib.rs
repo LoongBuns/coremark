@@ -56,7 +56,7 @@ pub fn run() -> f32 {
     unsafe {
         timer_ms = clock_ms();
 
-        let iterations = 1_000_000;
+        let iterations = 100_000;
         let mut crc: u16 = 0;
 
         for _ in 0..iterations {
