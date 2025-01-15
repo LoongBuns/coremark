@@ -1,19 +1,9 @@
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(all(not(test), target_arch = "wasm32"), no_std)]
 
 #[macro_use]
 extern crate alloc;
 
-#[panic_handler]
-fn panic_handler(_: &core::panic::PanicInfo) -> ! {
-    loop {}
-}
-
-mod allocator;
-
 use core::alloc::{GlobalAlloc, Layout};
-
-#[cfg(target_arch = "wasm32")]
-use allocator::FreeListAllocator;
 
 pub struct SyncAllocator<T>(T);
 
@@ -29,9 +19,20 @@ unsafe impl<T: GlobalAlloc> GlobalAlloc for SyncAllocator<T> {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
+mod allocator;
+
+#[cfg(all(not(test), target_arch = "wasm32"))]
+use allocator::FreeListAllocator;
+
+#[cfg(all(not(test), target_arch = "wasm32"))]
 #[global_allocator]
 static ALLOCATOR: SyncAllocator<FreeListAllocator> = SyncAllocator(FreeListAllocator::new());
+
+#[cfg(all(not(test), target_arch = "wasm32"))]
+#[panic_handler]
+fn panic_handler(_: &core::panic::PanicInfo) -> ! {
+    loop {}
+}
 
 mod list;
 mod matrix;
@@ -46,22 +47,32 @@ extern "C" {
     fn clock_ms() -> i64;
 }
 
+static mut CRC: u16 = 0;
+
 #[export_name = "run"]
 pub fn run() -> f32 {
-    let mut total_time = 0;
+    let mut timer_ms: i64;
 
     unsafe {
-        total_time += benchmark_list();
-        total_time += benchmark_matrix();
-        total_time += benchmark_state();
+        timer_ms = clock_ms();
+
+        let iterations = 1_000_000;
+        let mut crc: u16 = 0;
+
+        for _ in 0..iterations {
+            benchmark_list(&mut crc);
+            benchmark_matrix(&mut crc);
+            benchmark_state(&mut crc);
+        }
+        timer_ms = clock_ms() - timer_ms;
+
+        CRC = crc16(&crc.to_le_bytes(), CRC);
     }
 
-    total_time as f32 / 1000.0
+    timer_ms as f32
 }
 
-unsafe fn benchmark_list() -> i64 {
-    let start_time = clock_ms();
-
+fn benchmark_list(crc: &mut u16) {
     let mut list = LinkedList::<i16>::new();
     let size = 10;
 
@@ -69,23 +80,33 @@ unsafe fn benchmark_list() -> i64 {
         list.push_front(i);
     }
 
-    list.reverse();
-    list.find(|&x| x == size / 2);
+    *crc = crc16(&(list.size() as u32).to_le_bytes(), *crc);
 
-    for _ in 0..size {
-        list.pop_front();
+    list.reverse();
+
+    if let Some(found) = list.find(|&x| x == (size / 2) as i16) {
+        *crc = crc16(&found.to_le_bytes(), *crc);
     }
 
-    let end_time = clock_ms();
-    end_time - start_time
+    list.mergesort(&|a, b| a.cmp(b));
+
+    list.insert_after(&(size / 2 as i16), size * 2);
+
+    if let Some(removed_val) = list.remove_after(&(size * 2)) {
+        *crc = crc16(&removed_val.to_le_bytes(), *crc);
+    }
+
+    while let Some(v) = list.pop_front() {
+        if v == 0 {
+            *crc = crc16(&v.to_le_bytes(), *crc);
+        }
+    }
 }
 
-unsafe fn benchmark_matrix() -> i64 {
-    let start_time = clock_ms();
-
+fn benchmark_matrix(crc: &mut u16) {
     let size = 3;
-    let mut matrix_a = Matrix::<i16>::new(size);
-    let mut matrix_b = Matrix::<i16>::new(size);
+    let mut matrix_a = Matrix::<i16>::new(size, size);
+    let mut matrix_b = Matrix::<i16>::new(size, size);
 
     for i in 0..size {
         for j in 0..size {
@@ -94,22 +115,51 @@ unsafe fn benchmark_matrix() -> i64 {
         }
     }
 
+    let mid_val = matrix_a.get(1, 1);
+    *crc = crc16(&mid_val.to_le_bytes(), *crc);
+
     matrix_a.mul_const(2);
     matrix_b.add_const(-2);
-    matrix_a.mul_vect(&vec![1, 2, 3]);
-    matrix_a.mul_matrix(&matrix_b);
 
-    let end_time = clock_ms();
-    end_time - start_time
-}
-
-unsafe fn benchmark_state() -> i64 {
-    let start_time = clock_ms();
-
-    for token in ["123.45e-6", "678", "invalid", "42e2", ".5"] {
-        State::transition(token.as_bytes());
+    let inv_a = matrix_a.inverse();
+    if let Some(inv) = inv_a {
+        let inv_val = inv.get(1, 1);
+        *crc = crc16(&inv_val.to_le_bytes(), *crc);
     }
 
-    let end_time = clock_ms();
-    end_time - start_time
+    let vect_res = matrix_a.mul_vect(&[1, 2, 3]);
+    *crc = crc16(&vect_res[1].to_le_bytes(), *crc);
+
+    let mat_c = matrix_a.mul_matrix(&matrix_b);
+
+    let mut sum: i16 = 0;
+    for i in 0..size {
+        for j in 0..size {
+            sum = sum.wrapping_add(mat_c.get(i, j));
+        }
+    }
+    *crc = crc16(&sum.to_le_bytes(), *crc);
+}
+
+fn benchmark_state(crc: &mut u16) {
+    for token in ["123.45e-6", "678", "invalid", "42e2", ".5"] {
+        let (final_state, path) = State::transition(token.as_bytes());
+        *crc = crc16(&[(final_state as u8)], *crc);
+        let path_len = path.len() as u32;
+        *crc = crc16(&path_len.to_le_bytes(), *crc);
+    }
+}
+
+fn crc16(data: &[u8], mut crc: u16) -> u16 {
+    for &byte in data {
+        crc ^= (byte as u16) << 8;
+        for _ in 0..8 {
+            if (crc & 0x8000) != 0 {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    crc
 }

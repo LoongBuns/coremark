@@ -1,12 +1,12 @@
 use coremark::engines::{wasmtime_coremark, wasmedge_coremark, wasmer_coremark, wasm3_coremark, wasmi_coremark, wamr_coremark};
 
 fn main() {
-    // let coremark_wasm = include_bytes!("../../../target/wasm32-unknown-unknown/release/coremark_wasm.wasm");
-    let coremark_wasm = include_bytes!("../coremark-minimal.wasm");
+    let coremark_wasm = include_bytes!("../../../target/wasm32-unknown-unknown/release/coremark_wasm.wasm");
+    // let coremark_wasm = include_bytes!("../coremark-minimal.wasm");
 
     println!("Running Coremark tests... [should take 12..20 seconds per engine]");
 
-    let engines = ["wasmtime", "wasmedge", "wasmer", "wasm3", "wasmi", "wamr"];
+    let engines = ["wasmtime", "wasmedge", "wasmer", "wasm3", "wasmi"];
     let mut results = vec![];
 
     for &engine in &engines {
@@ -29,8 +29,8 @@ fn main() {
     }
 
     println!("\nResults:\n");
-    println!("| Engine   | Result   |\n|----------|----------|");
+    println!("| Engine     | Result(ms)         |\n|------------|--------------------|");
     for (engine, result) in results {
-        println!("| {:<8} | {:<8.2} |", engine, result);
+        println!("| {:<10} | {:<18.2} |", engine, result);
     }
 }
