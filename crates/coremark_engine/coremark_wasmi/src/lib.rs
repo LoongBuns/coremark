@@ -1,9 +1,8 @@
 use std::error::Error;
 use std::result::Result;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use wasmi::{Engine, Func, Linker, Module, Store};
-
-use super::clock_ms;
 
 pub fn wasmi_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let engine = Engine::default();
@@ -11,7 +10,12 @@ pub fn wasmi_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let module = Module::new(&engine, &b[..])?;
 
     let mut store = Store::new(&engine, 64);
-    let func = Func::wrap(&mut store, || clock_ms());
+    let func = Func::wrap(&mut store, || {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Clock may have gone backwards")
+            .as_millis() as i64
+    });
 
     let mut linker = <Linker<i64>>::new(&engine);
     linker.define("env", "clock_ms", func)?;

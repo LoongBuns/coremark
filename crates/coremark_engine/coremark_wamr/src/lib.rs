@@ -1,22 +1,24 @@
-use core::error::Error;
-use core::ffi::c_void;
-use core::result::Result;
+use std::error::Error;
+use std::ffi::c_void;
+use std::result::Result;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use wamr_rust_sdk::{
     function::Function, instance::Instance, module::Module, runtime::RuntimeBuilder, value::WasmValue,
 };
 
-use super::clock_ms;
-
-extern "C" fn clock_ms_host() -> i64 {
-    clock_ms()
+extern "C" fn clock_ms() -> i64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Clock may have gone backwards")
+        .as_millis() as i64
 }
 
-pub fn wamr_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
+pub fn wamr_container(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let runtime = RuntimeBuilder::new("env")
         .use_system_allocator()
         .run_as_interpreter()
-        .register_host_function("clock_ms", clock_ms_host as *mut c_void)
+        .register_host_function("clock_ms", clock_ms as *mut c_void)
         .build()?;
 
     let module = Module::from_vec(&runtime, Vec::from(&b[..]), "")?;
@@ -28,6 +30,6 @@ pub fn wamr_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     if let WasmValue::F32(res) = function.call(&instance, &vec![])? {
         Ok(res)
     } else {
-        panic!("Failed running coremark in wasmi");
+        panic!("Failed running coremark in wamr");
     }
 }

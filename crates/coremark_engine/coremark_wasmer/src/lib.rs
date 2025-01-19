@@ -1,19 +1,23 @@
-use core::error::Error;
-use core::result::Result;
+use std::error::Error;
+use std::result::Result;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use wasmer::{
     imports, Function, FunctionType, Instance, Module, Store, Type, TypedFunction, Value,
 };
 
-use super::clock_ms;
-
-pub fn wasmer_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
+pub fn wasmer_container(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let mut store = Store::default();
     let module = Module::new(&store, &b[..])?;
 
     let clock_ms_host_signature = FunctionType::new(vec![], vec![Type::I64]);
     let clock_ms_host = Function::new(&mut store, &clock_ms_host_signature, |_| {
-        Ok(vec![Value::I64(clock_ms())])
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Clock may have gone backwards")
+            .as_millis() as i64;
+
+        Ok(vec![Value::I64(now)])
     });
 
     let import_object = imports! {

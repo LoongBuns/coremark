@@ -1,11 +1,17 @@
-use core::error::Error;
-use core::result::Result;
+use std::error::Error;
+use std::result::Result;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use wasm3::{Environment, Module};
 
-use super::clock_ms;
+pub fn clock_ms() -> i64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Clock may have gone backwards")
+        .as_millis() as i64
+}
 
-pub fn wasm3_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
+pub fn wasm3_container(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let env = Environment::new()?;
     let rt = env.create_runtime(2 * 1024)?;
     let mut module = rt.load_module(Module::parse(&env, &b[..])?)?;

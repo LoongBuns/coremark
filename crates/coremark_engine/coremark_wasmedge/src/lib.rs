@@ -1,26 +1,30 @@
-use core::error::Error;
-use core::result::Result;
 use std::collections::HashMap;
+use std::error::Error;
+use std::result::Result;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use wasmedge_sdk::{
     error::CoreError, params, AsInstance, CallingFrame, ImportObjectBuilder, Instance, Module,
     Store, Vm, WasmValue,
 };
 
-use super::clock_ms;
-
-fn clock_ms_host(
+fn clock_ms(
     _: &mut (),
     _inst: &mut Instance,
     _frame: &mut CallingFrame,
     _input: Vec<WasmValue>,
 ) -> Result<Vec<WasmValue>, CoreError> {
-    Ok(vec![WasmValue::from_i64(clock_ms())])
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Clock may have gone backwards")
+        .as_millis() as i64;
+
+    Ok(vec![WasmValue::from_i64(now)])
 }
 
-pub fn wasmedge_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
+pub fn wasmedge_container(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let mut import_builder = ImportObjectBuilder::new("env", ())?;
-    import_builder.with_func::<(), i64>("clock_ms", clock_ms_host)?;
+    import_builder.with_func::<(), i64>("clock_ms", clock_ms)?;
     let mut import_object = import_builder.build();
 
     let mut instances = HashMap::new();

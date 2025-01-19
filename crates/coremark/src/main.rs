@@ -1,4 +1,4 @@
-use coremark::engines::{wasmtime_coremark, wasmedge_coremark, wasmer_coremark, wasm3_coremark, wasmi_coremark, wamr_coremark};
+use coremark_wamr::wamr_container;
 
 fn main() {
     let coremark_wasm = include_bytes!("../../../target/wasm32-unknown-unknown/release/coremark_wasm.wasm");

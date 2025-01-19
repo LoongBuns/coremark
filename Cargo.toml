@@ -1,6 +1,19 @@
 [workspace]
-members  = [
+members = [
     "./crates/coremark",
-    "./crates/coremark_wasm",
+    "./crates/coremark_benchmark",
+    "./crates/coremark_engine/*",
+]
+default-members = [
+    "./crates/coremark",
+    "./crates/coremark_engine/*",
 ]
 resolver = "2"
+
+[workspace.dependencies]
+coremark_wamr     = { path = "./crates/coremark_engine/coremark_wamr" }
+coremark_wasm3    = { path = "./crates/coremark_engine/coremark_wasm3" }
+coremark_wasmedge = { path = "./crates/coremark_engine/coremark_wasmedge" }
+coremark_wasmer   = { path = "./crates/coremark_engine/coremark_wasmer" }
+coremark_wasmi    = { path = "./crates/coremark_engine/coremark_wasmi" }
+coremark_wasmtime = { path = "./crates/coremark_engine/coremark_wasmtime" }

@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wamr-rust-sdk = { git = "https://github.com/LoongBuns/wamr-rust-sdk" }
-wasm3 = { version = "0.3", features=["build-bindgen"] }
-wasmedge-sdk = "0.14"
-wasmer = "5.0"
-wasmi = "0.40"
-wasmtime = "28.0"
+coremark_wamr.workspace = true
+coremark_wasm3.workspace = true
+coremark_wasmedge.workspace = true
+coremark_wasmer.workspace = true
+coremark_wasmi.workspace = true
+coremark_wasmtime.workspace = true
