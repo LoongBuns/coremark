@@ -7,9 +7,4 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get purge -y imagemagick imagemagick-6-common
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends cmake gnupg lsb-release software-properties-common wget
-
-RUN cd /tmp \
-    && wget https://apt.llvm.org/llvm.sh \
-    && chmod a+x llvm.sh \
-    && ./llvm.sh 15
+    && apt-get -y install --no-install-recommends clang cmake

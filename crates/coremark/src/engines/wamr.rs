@@ -3,7 +3,7 @@ use core::ffi::c_void;
 use core::result::Result;
 
 use wamr_rust_sdk::{
-    function::Function, instance::Instance, module::Module, runtime::Runtime, value::WasmValue,
+    function::Function, instance::Instance, module::Module, runtime::RuntimeBuilder, value::WasmValue,
 };
 
 use super::clock_ms;
@@ -13,7 +13,7 @@ extern "C" fn clock_ms_host() -> i64 {
 }
 
 pub fn wamr_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
-    let runtime = Runtime::builder_with_module_name("env")
+    let runtime = RuntimeBuilder::new("env")
         .use_system_allocator()
         .run_as_interpreter()
         .register_host_function("clock_ms", clock_ms_host as *mut c_void)

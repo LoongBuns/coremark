@@ -210,12 +210,12 @@ mod tests {
 
         for i in 0..a {
             for j in 0..b {
-                matrix_a.set(i, j, (i + j) as i32);
+                matrix_a.set(i, j, i as i32 + j as i32);
             }
         }
         for i in 0..b {
             for j in 0..a {
-                matrix_b.set(i, j, (i - j) as i32);
+                matrix_b.set(i, j, i as i32 - j as i32);
             }
         }
 
@@ -268,10 +268,10 @@ mod tests {
         let size = 2;
         let mut matrix = Matrix::new(size, size);
 
-        matrix.set(0, 0, 4);
-        matrix.set(0, 1, 7);
-        matrix.set(1, 0, 2);
-        matrix.set(1, 1, 6);
+        matrix.set(0, 0, 4.0);
+        matrix.set(0, 1, 7.0);
+        matrix.set(1, 0, 2.0);
+        matrix.set(1, 1, 6.0);
 
         let inverse = matrix.inverse();
         assert!(inverse.is_some());
