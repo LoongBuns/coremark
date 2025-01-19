@@ -1,0 +1,45 @@
+name: Benchmark Runtime
+
+on:
+  workflow_dispatch:
+
+env: 
+  CARGO_TERM_COLOR: always
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust target
+        run: |
+          rustup target add wasm32-unknown-unknown wasm32-wasi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          cache: 'pip'
+
+      - name: Run benchmark
+        run: cargo run -p coremark > cache
+
+      - name: Generate benchmark chart
+        run: |
+          pip install matplotlib
+          python benchmark_chart.py cache chart.png
+
+      - name: Upload benchmark chart
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan benchmark
+          git rm -rf . || true
+          mv chart.png .
+          git add chart.png
+          git commit -m "Benchmark chart ${{ github.ref }}"
+          git push -f origin benchmark
