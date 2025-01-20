@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use wasmi::{Engine, Func, Linker, Module, Store};
 
-pub fn wasmi_coremark(b: &[u8]) -> Result<f32, Box<dyn Error>> {
+pub fn wasmi_container(b: &[u8]) -> Result<f32, Box<dyn Error>> {
     let engine = Engine::default();
 
     let module = Module::new(&engine, &b[..])?;

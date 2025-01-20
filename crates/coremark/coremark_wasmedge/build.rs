@@ -14,6 +14,8 @@ fn main() {
 
         if !install_status.map(|s| s.success()).unwrap_or(false) {
             panic!("Failed to install WasmEdge.");
+        } else {
+            println!("WasmEdge installed successfully.");
         }
     }
 }

@@ -1,19 +1,23 @@
 [workspace]
 members = [
-    "./crates/coremark",
-    "./crates/coremark_benchmark",
-    "./crates/coremark_engine/*",
-]
-default-members = [
-    "./crates/coremark",
-    "./crates/coremark_engine/*",
+    "./crates/coremark/*",
+    "./crates/coremark_wasm",
 ]
 resolver = "2"
 
-[workspace.dependencies]
-coremark_wamr     = { path = "./crates/coremark_engine/coremark_wamr" }
-coremark_wasm3    = { path = "./crates/coremark_engine/coremark_wasm3" }
-coremark_wasmedge = { path = "./crates/coremark_engine/coremark_wasmedge" }
-coremark_wasmer   = { path = "./crates/coremark_engine/coremark_wasmer" }
-coremark_wasmi    = { path = "./crates/coremark_engine/coremark_wasmi" }
-coremark_wasmtime = { path = "./crates/coremark_engine/coremark_wasmtime" }
+[package]
+name = "coremark"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+coremark_wamr     = { path = "./crates/coremark/coremark_wamr" }
+coremark_wasm3    = { path = "./crates/coremark/coremark_wasm3" }
+coremark_wasmedge = { path = "./crates/coremark/coremark_wasmedge" }
+coremark_wasmer   = { path = "./crates/coremark/coremark_wasmer" }
+coremark_wasmi    = { path = "./crates/coremark/coremark_wasmi" }
+coremark_wasmtime = { path = "./crates/coremark/coremark_wasmtime" }
+
+[profile.release]
+opt-level = "z"
+lto = true
