@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wasmedge-sdk = "0.14"
+wasmedge-sdk = { version = "0.14", features = ["standalone"] }
 
 [features]
-aot = []
+aot = ["wasmedge-sdk/aot"]

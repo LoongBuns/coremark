@@ -29,7 +29,7 @@ jobs:
       - name: Generate benchmark chart
         run: |
           pip install matplotlib
-          python benchmark_chart.py cache chart.png
+          python .github/workflows/benchmark_chart.py cache chart.png
 
       - name: Upload benchmark chart
         env:
@@ -39,7 +39,6 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git checkout --orphan benchmark
           git rm -rf . || true
-          mv chart.png .
           git add chart.png
           git commit -m "Benchmark chart ${{ github.ref }}"
           git push -f origin benchmark

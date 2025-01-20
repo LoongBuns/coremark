@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wasm3 = { version = "0.3", features=["build-bindgen"] }
+wasm3 = { git = "https://github.com/wasm3/wasm3-rs", features=["build-bindgen"] }
