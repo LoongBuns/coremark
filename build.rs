@@ -6,6 +6,12 @@ fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let workspace_dir = Path::new(&manifest_dir);
 
+    let rustflags = "-C link-arg=--initial-memory=65536 \
+                     -C link-arg=-zstack-size=8192 \
+                     -C link-arg=--export=__heap_base \
+                     -C link-arg=--export=__data_end \
+                     -C link-arg=--strip-all";
+
     let status = Command::new("cargo")
         .args([
             "build",
@@ -15,6 +21,7 @@ fn main() {
             "--package",
             "coremark_wasm",
         ])
+        .env("RUSTFLAGS", rustflags)
         .current_dir(&workspace_dir)
         .status();
 
