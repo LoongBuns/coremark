@@ -16,7 +16,7 @@ jobs:
 
       - name: Setup Rust target
         run: |
-          rustup target add wasm32-unknown-unknown wasm32-wasi
+          rustup target add wasm32-unknown-unknown wasm32-wasip1
 
       - name: Setup Python
         uses: actions/setup-python@v5
