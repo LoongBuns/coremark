@@ -11,7 +11,7 @@ A latest coremark benchmark for wasm runtime.
 You can start benchamrk by command:
 
 ```sh
-cargo run -p coremark
+cargo run
 ```
 
 **Interpreter result:**

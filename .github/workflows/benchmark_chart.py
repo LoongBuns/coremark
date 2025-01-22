@@ -33,13 +33,18 @@ def parse_results(file_path):
 def generate_chart(results, output_file="chart.png"):
     engines = list(results.keys())
     times = list(results.values())
-    
-    # Create the bar chart
-    plt.figure(figsize=(10, 6))
-    plt.bar(engines, times)
-    plt.xlabel("Engine")
-    plt.ylabel("Result (ms)")
-    plt.title("Coremark Benchmark Results")
+
+    plt.figure(figsize=(12, 8))
+    bars = plt.bar(engines, times)
+
+    plt.xlabel("Engine", fontsize=14)
+    plt.ylabel("Result (ms)", fontsize=14)
+    plt.title("Coremark Benchmark Results", fontsize=16, fontweight="bold")
+
+    for bar, time in zip(bars, times):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height, f"{time:.2f}", ha="center", va="bottom", fontsize=10)
+
     plt.tight_layout()
     plt.savefig(output_file)
     print(f"Chart saved as {output_file}")

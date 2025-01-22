@@ -11,7 +11,7 @@ fn main() {
 
     println!("Running Coremark tests... [should take 12..20 seconds per engine]");
 
-    let engines = ["wasmtime", "wasmedge", "wasmer", "wasm3", "wasmi"];
+    let engines = ["wasmtime", "wasmedge", "wasmer", "wasm3", "wasmi", "wamr"];
     let mut results = vec![];
 
     for &engine in &engines {
